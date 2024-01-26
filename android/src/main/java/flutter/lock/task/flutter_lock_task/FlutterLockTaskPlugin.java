@@ -62,6 +62,9 @@ public class FlutterLockTaskPlugin implements FlutterPlugin, ActivityAware, Meth
             case "getPackageName":
                 getPackageName(result);
                 break;
+            case "clearDeviceOwnerApp":
+                clearDeviceOwnerApp(result);
+                break;
             default:
                 result.notImplemented();
         }
@@ -128,7 +131,22 @@ public class FlutterLockTaskPlugin implements FlutterPlugin, ActivityAware, Meth
             result.error("LOCK_TASK_ERROR", "Failed to open home settings: " + e.getMessage(), null);
         }
     }
-
+    private void clearDeviceOwnerApp(@NonNull Result result) {
+        try {
+            if (mActivity != null) {
+                if (dpm.isDeviceOwnerApp(mActivity.getPackageName())) {
+                    dpm.clearDeviceOwnerApp(mActivity.getPackageName());
+                    result.success(true);
+                } else {
+                    result.success(false); // Not the device owner
+                }
+            } else {
+                result.success(false); // Activity is null
+            }
+        } catch (Exception e) {
+            result.error("DEVICE_OWNER_ERROR", "Failed to clear device owner: " + e.getMessage(), null);
+        }
+    }
     private void getPackageName(@NonNull Result result) {
         if (mActivity != null) {
             result.success(mActivity.getPackageName());
